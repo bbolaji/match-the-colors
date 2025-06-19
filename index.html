@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match the Colors</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .bottle {
+      width: 60px;
+      height: 100px;
+      border: 2px solid #333;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+    }
+    .bottle:hover {
+      transform: scale(1.05);
+    }
+    #matchCount {
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+    .hidden-layer {
+      background-color: #ccc;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Match the Colors</h1>
+  <p>Click a top-layer bottle, then guess its position in the bottom layer. Try to get all 5 matches in the fewest moves!</p>
+
+  <div class="container" id="topLayer"></div>
+  <div class="container" id="bottomLayer"></div>
+
+  <div id="matchCount">Matches: 0 | Moves: 0</div>
+  <button onclick="resetGame()">🔄 Restart Game</button>
+
+  <script>
+    const colors = ["red", "blue", "green", "yellow", "orange"];
+    let topColors = [];
+    let bottomColors = [];
+    let revealedMatches = [];
+
+    let selectedTop = null;
+    let matches = 0;
+    let moves = 0;
+
+    const topLayer = document.getElementById("topLayer");
+    const bottomLayer = document.getElementById("bottomLayer");
+    const matchCountDisplay = document.getElementById("matchCount");
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function initGame() {
+      topColors = [...colors];
+      bottomColors = shuffle([...colors]);
+      revealedMatches = Array(5).fill(false);
+      selectedTop = null;
+      matches = 0;
+      moves = 0;
+      updateDisplay();
+      renderLayers();
+    }
+
+    function renderLayers() {
+      topLayer.innerHTML = "";
+      bottomLayer.innerHTML = "";
+
+      topColors.forEach((color, index) => {
+        const div = document.createElement("div");
+        div.className = "bottle";
+        div.style.backgroundColor = color;
+        div.onclick = () => selectTop(index);
+        topLayer.appendChild(div);
+      });
+
+      for (let i = 0; i < bottomColors.length; i++) {
+        const div = document.createElement("div");
+        div.className = "bottle";
+        if (!revealedMatches[i]) div.classList.add("hidden-layer");
+        if (revealedMatches[i]) div.style.backgroundColor = bottomColors[i];
+        div.onclick = () => guessMatch(i);
+        bottomLayer.appendChild(div);
+      }
+    }
+
+    function selectTop(index) {
+      selectedTop = index;
+    }
+
+    function guessMatch(bottomIndex) {
+      if (selectedTop === null || revealedMatches[bottomIndex]) return;
+
+      moves++;
+      if (topColors[selectedTop] === bottomColors[bottomIndex]) {
+        matches++;
+        revealedMatches[bottomIndex] = true;
+      }
+
+      selectedTop = null;
+      updateDisplay();
+      renderLayers();
+
+      if (matches === 5) {
+        setTimeout(() => {
+          alert(🎉 You matched all colors in ${moves} moves!);
+        }, 100);
+      }
+    }
+
+    function updateDisplay() {
+      matchCountDisplay.textContent = Matches: ${matches} | Moves: ${moves};
+    }
+
+    function resetGame() {
+      initGame();
+    }
+
+    initGame();
+  </script>
+</body>
+</html>
